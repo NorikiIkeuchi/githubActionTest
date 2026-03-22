@@ -8,8 +8,8 @@
     "dev": "node --watch src/index.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "lint": "eslint src/ --ext .js",
-    "lint:fix": "eslint src/ --ext .js --fix",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "format": "prettier --write 'src/**/*.js'",
     "format:check": "prettier --check 'src/**/*.js'",
     "build:docs": "node scripts/generate-docs.js"
@@ -20,6 +20,7 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "eslint": "^10.1.0",
     "jest": "^30.3.0",
     "prettier": "^3.3.0",
