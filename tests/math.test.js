@@ -1,4 +1,4 @@
-const { add, subtract, multiply, divide, fibonacci, isPrime } = require("../src/math");
+const { add, subtract, multiply, divide, fibonacci, isPrime, clamp } = require("../src/math");
 
 describe("Math utilities", () => {
   describe("add", () => {
@@ -30,6 +30,15 @@ describe("Math utilities", () => {
     test("returns 55 for n=10", () => expect(fibonacci(10)).toBe(55));
     test("throws for negative input", () => {
       expect(() => fibonacci(-1)).toThrow("Negative number not allowed");
+    });
+  });
+
+  describe("clamp", () => {
+    test("returns value when within range", () => expect(clamp(5, 0, 10)).toBe(5));
+    test("returns min when value is below range", () => expect(clamp(-3, 0, 10)).toBe(0));
+    test("returns max when value is above range", () => expect(clamp(15, 0, 10)).toBe(10));
+    test("throws when min > max", () => {
+      expect(() => clamp(5, 10, 0)).toThrow("min must be less than or equal to max");
     });
   });
 

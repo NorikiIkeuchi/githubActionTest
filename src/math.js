@@ -28,6 +28,11 @@ function fibonacci(n) {
   return b;
 }
 
+function clamp(value, min, max) {
+  if (min > max) throw new Error("min must be less than or equal to max");
+  return Math.min(Math.max(value, min), max);
+}
+
 function isPrime(n) {
   if (n < 2) return false;
   for (let i = 2; i <= Math.sqrt(n); i++) {
@@ -36,4 +41,4 @@ function isPrime(n) {
   return true;
 }
 
-module.exports = { add, subtract, multiply, divide, fibonacci, isPrime };
+module.exports = { add, subtract, multiply, divide, fibonacci, isPrime, clamp };
