@@ -1,0 +1,78 @@
+# ============================================================
+# 03: 手動トリガー (workflow_dispatch) - 入力パラメータ付き
+# ============================================================
+# 学べること:
+#   - workflow_dispatch によるGitHub UIからの手動実行
+#   - inputs によるパラメータ定義 (string, choice, boolean)
+#   - ${{ github.event.inputs.* }} での入力値参照
+#   - 条件分岐 (if)
+# ============================================================
+
+name: "03 - Manual Trigger"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "デプロイ先の環境"
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      log_level:
+        description: "ログレベル"
+        required: false
+        default: "info"
+        type: choice
+        options:
+          - debug
+          - info
+          - warn
+          - error
+      run_tests:
+        description: "テストを実行するか"
+        required: false
+        default: true
+        type: boolean
+      message:
+        description: "デプロイメッセージ"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show parameters
+        run: |
+          echo "🎯 Environment: ${{ inputs.environment }}"
+          echo "📋 Log Level:   ${{ inputs.log_level }}"
+          echo "🧪 Run Tests:   ${{ inputs.run_tests }}"
+          echo "💬 Message:     ${{ inputs.message }}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm ci
+
+      - name: Run tests
+        if: ${{ inputs.run_tests == true }}
+        run: npm test
+
+      - name: Simulate deployment
+        run: |
+          echo "🚀 Deploying to ${{ inputs.environment }}..."
+          sleep 3
+          echo "✅ Deployment complete!"
+
+      - name: Production warning
+        if: ${{ inputs.environment == 'production' }}
+        run: echo "⚠️ This was a PRODUCTION deployment!"

@@ -1,0 +1,42 @@
+# ============================================================
+# 01: 基本的なCI - push / PR をトリガーにテスト・リントを実行
+# ============================================================
+# 学べること:
+#   - on (push / pull_request) によるトリガー
+#   - jobs / steps の基本構造
+#   - actions/checkout, actions/setup-node の使い方
+#   - npm スクリプトの実行
+# ============================================================
+
+name: "01 - Basic CI"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check formatting
+        run: npm run format:check

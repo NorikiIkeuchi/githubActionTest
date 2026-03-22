@@ -1,0 +1,96 @@
+# ============================================================
+# 08: GitHub Pages へのデプロイ
+# ============================================================
+# 学べること:
+#   - permissions による GITHUB_TOKEN 権限の設定
+#   - concurrency によるデプロイの排他制御
+#   - environment を使ったデプロイ管理
+#   - GitHub Pages 用の公式アクション
+# ============================================================
+# 使い方:
+#   1. リポジトリの Settings > Pages で Source を "GitHub Actions" に設定
+#   2. このワークフローを手動実行 or main に push
+# ============================================================
+
+name: "08 - Deploy to GitHub Pages"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Generate docs
+        run: npm run build:docs
+
+      - name: Create index.html for Pages
+        run: |
+          cat > docs/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="ja">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GitHub Actions Playground</title>
+            <style>
+              body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+              h1 { color: #0969da; }
+              code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; }
+              .badge { display: inline-block; background: #238636; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <h1>GitHub Actions Playground</h1>
+            <p class="badge">Deployed via GitHub Actions</p>
+            <p>このページは GitHub Actions によって自動デプロイされています。</p>
+            <h2>API ドキュメント</h2>
+            <ul>
+              <li><code>GET /</code> - アプリ情報</li>
+              <li><code>GET /health</code> - ヘルスチェック</li>
+              <li><code>POST /math/calc</code> - 四則演算</li>
+              <li><code>GET /math/fibonacci/:n</code> - フィボナッチ数</li>
+              <li><code>GET /math/prime/:n</code> - 素数判定</li>
+            </ul>
+          </body>
+          </html>
+          HTMLEOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

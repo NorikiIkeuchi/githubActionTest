@@ -1,0 +1,45 @@
+# ============================================================
+# 02: マトリックスビルド - 複数のNode.jsバージョン × OS で並列テスト
+# ============================================================
+# 学べること:
+#   - strategy.matrix による組み合わせ並列実行
+#   - exclude / include で特定の組み合わせを制御
+#   - fail-fast の挙動
+#   - ${{ matrix.* }} による変数参照
+# ============================================================
+
+name: "02 - Matrix Build"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18, 20, 22]
+        exclude:
+          - os: windows-latest
+            node-version: 18
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Report
+        run: |
+          echo "✅ Tests passed on ${{ matrix.os }} with Node.js ${{ matrix.node-version }}"

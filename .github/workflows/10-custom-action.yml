@@ -1,0 +1,30 @@
+# ============================================================
+# 10: カスタムアクション (Composite Action) の利用
+# ============================================================
+# 学べること:
+#   - ローカルの composite action の作成と利用
+#   - action.yml の構造
+#   - inputs / outputs の定義
+#   - 再利用可能な処理のパッケージ化
+# ============================================================
+
+name: "10 - Custom Composite Action"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  use-custom-action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use local composite action
+        uses: ./.github/actions/setup-and-greet
+        with:
+          node-version: "20"
+          greeting: "GitHub Actions マスターへの道"
+
+      - name: Run tests (Node.js is already set up by action)
+        run: npm test

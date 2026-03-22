@@ -1,0 +1,49 @@
+# ============================================================
+# カスタム Composite Action
+# ============================================================
+# 学べること:
+#   - composite action の定義方法
+#   - inputs / outputs の使い方
+#   - 複数ステップを1つのアクションにまとめる
+
+name: "Setup and Greet"
+description: "Node.js をセットアップし、依存をインストールして挨拶する"
+
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "20"
+  greeting:
+    description: "Greeting message"
+    required: false
+    default: "Hello from composite action!"
+
+outputs:
+  node-version-actual:
+    description: "Actual Node.js version installed"
+    value: ${{ steps.node-ver.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: "npm"
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Greet
+      shell: bash
+      run: |
+        echo "🎉 ${{ inputs.greeting }}"
+        echo "📦 Node.js $(node -v) is ready!"
+
+    - name: Get Node version
+      id: node-ver
+      shell: bash
+      run: echo "version=$(node -v)" >> $GITHUB_OUTPUT

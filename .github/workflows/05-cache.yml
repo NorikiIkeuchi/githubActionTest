@@ -1,0 +1,65 @@
+# ============================================================
+# 05: キャッシュ活用 - node_modules を再利用して高速化
+# ============================================================
+# 学べること:
+#   - actions/cache による依存キャッシュ
+#   - hashFiles() でキャッシュキーを生成
+#   - キャッシュのヒット/ミスの確認
+#   - setup-node の cache オプション（簡易版）
+# ============================================================
+
+name: "05 - Cache"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # --- 方法1: actions/cache を明示的に使う ---
+  build-with-explicit-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache node_modules
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Show cache status
+        run: |
+          echo "Cache hit: ${{ steps.cache-deps.outputs.cache-hit }}"
+
+      - run: npm test
+
+  # --- 方法2: setup-node の cache 機能を使う（簡潔） ---
+  build-with-setup-node-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js with cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+      - run: npm test

@@ -1,0 +1,29 @@
+# ============================================================
+# 09b: 再利用可能ワークフローの呼び出し側
+# ============================================================
+# 学べること:
+#   - uses で他のワークフローファイルを呼び出す
+#   - with で inputs を渡す
+#   - needs.*.outputs で結果を受け取る
+# ============================================================
+
+name: "09b - Call Reusable Workflow"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call-reusable:
+    uses: ./.github/workflows/09-reusable-workflow.yml
+    with:
+      node-version: "20"
+      run-lint: true
+
+  show-result:
+    runs-on: ubuntu-latest
+    needs: call-reusable
+
+    steps:
+      - name: Show result
+        run: |
+          echo "Result: ${{ needs.call-reusable.outputs.test-result }}"

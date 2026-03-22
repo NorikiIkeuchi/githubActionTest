@@ -1,0 +1,68 @@
+# ============================================================
+# 11: 条件分岐とパスフィルタ
+# ============================================================
+# 学べること:
+#   - paths / paths-ignore でトリガーするファイルを制限
+#   - if 条件による分岐
+#   - success() / failure() / always() / cancelled() の使い方
+#   - continue-on-error でエラーを無視
+# ============================================================
+
+name: "11 - Conditional & Path Filters"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Run tests
+        id: tests
+        run: npm test
+
+      - name: On test success
+        if: success()
+        run: echo "✅ All tests passed!"
+
+      - name: On test failure
+        if: failure()
+        run: echo "❌ Tests failed!"
+
+      - name: Always runs
+        if: always()
+        run: echo "🏁 This step always runs regardless of previous results"
+
+      - name: Intentionally failing step (ignored)
+        continue-on-error: true
+        run: exit 1
+
+      - name: Still runs after ignored failure
+        run: echo "👆 The previous step failed but was ignored"
+
+      - name: Only on main branch
+        if: github.ref == 'refs/heads/main'
+        run: echo "🌿 This only runs on the main branch"
+
+      - name: Only on PRs
+        if: github.event_name == 'pull_request'
+        run: echo "🔀 This only runs on pull requests"

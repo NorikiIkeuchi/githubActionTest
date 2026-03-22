@@ -1,0 +1,77 @@
+# ============================================================
+# 06: アーティファクト - ビルド成果物の保存とジョブ間共有
+# ============================================================
+# 学べること:
+#   - actions/upload-artifact でファイルをアップロード
+#   - actions/download-artifact で別ジョブからダウンロード
+#   - needs によるジョブの依存関係
+#   - テストカバレッジレポートの保存
+# ============================================================
+
+name: "06 - Artifacts"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage
+
+      - name: Generate docs
+        run: npm run build:docs
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-docs
+          path: docs/
+          retention-days: 7
+
+  use-artifacts:
+    runs-on: ubuntu-latest
+    needs: test-and-build
+
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: ./downloaded-coverage
+
+      - name: Download docs
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-docs
+          path: ./downloaded-docs
+
+      - name: Show downloaded files
+        run: |
+          echo "📊 Coverage report:"
+          ls -la ./downloaded-coverage/
+          echo ""
+          echo "📄 Docs:"
+          ls -la ./downloaded-docs/
+          cat ./downloaded-docs/api.md

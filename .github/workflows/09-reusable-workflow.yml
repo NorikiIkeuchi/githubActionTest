@@ -1,0 +1,56 @@
+# ============================================================
+# 09: 再利用可能ワークフロー (Reusable Workflow)
+# ============================================================
+# 学べること:
+#   - workflow_call による再利用可能なワークフロー定義
+#   - inputs / secrets の受け渡し
+#   - outputs で結果を返す
+#   - 他のワークフローから呼び出す方法
+# ============================================================
+
+name: "09 - Reusable Workflow (callable)"
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node.js version to use"
+        required: false
+        type: string
+        default: "20"
+      run-lint:
+        description: "Whether to run linter"
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      test-result:
+        description: "Test result message"
+        value: ${{ jobs.reusable-test.outputs.result }}
+
+jobs:
+  reusable-test:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.test.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Run lint
+        if: ${{ inputs.run-lint }}
+        run: npm run lint
+
+      - name: Run tests
+        id: test
+        run: |
+          npm test
+          echo "result=Tests passed on Node.js ${{ inputs.node-version }}" >> $GITHUB_OUTPUT
