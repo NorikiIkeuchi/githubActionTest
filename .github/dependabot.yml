@@ -1,0 +1,70 @@
+# ============================================================
+# Dependabot 設定
+# ============================================================
+# 依存パッケージに新バージョンが出たら自動で PR を作成する。
+#
+# 学べること:
+#   - package-ecosystem: npm / github-actions の監視
+#   - schedule.interval: 更新チェックの頻度
+#   - open-pull-requests-limit: 同時に開く PR の上限
+#   - labels / assignees / reviewers の自動付与
+#   - groups: 複数パッケージをまとめて1つの PR にする
+# ============================================================
+
+version: 2
+
+updates:
+  # ----------------------------------------------------------
+  # npm パッケージの監視
+  # ----------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"   # weekly / daily / monthly
+      day: "monday"        # 毎週月曜日にチェック
+      time: "09:00"        # JST 18:00 (UTC+9)
+      timezone: "Asia/Tokyo"
+
+    # 同時に開く PR の最大数（多すぎるとレビューが大変なので制限）
+    open-pull-requests-limit: 5
+
+    # PR に自動でラベルを付ける
+    labels:
+      - "dependencies"
+
+    # PR のコミットメッセージのプレフィックス
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore(dev)"
+      include: "scope"
+
+    # パッケージをグループ化（関連パッケージをまとめて1PR にする）
+    groups:
+      # 本番依存をまとめる
+      production-dependencies:
+        dependency-type: "production"
+
+      # 開発依存をまとめる（eslint 系、jest 系など）
+      dev-dependencies:
+        dependency-type: "development"
+
+  # ----------------------------------------------------------
+  # GitHub Actions 自体のバージョン監視
+  # （actions/checkout@v4 などが古くなったら PR が来る）
+  # ----------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+
+    open-pull-requests-limit: 5
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+    commit-message:
+      prefix: "chore(actions)"
