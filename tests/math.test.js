@@ -1,4 +1,4 @@
-const { add, subtract, multiply, divide, fibonacci, isPrime } = require("../src/math");
+const { add, subtract, multiply, divide, fibonacci, isPrime, power } = require("../src/math");
 
 describe("Math utilities", () => {
   describe("add", () => {
@@ -30,6 +30,14 @@ describe("Math utilities", () => {
     test("returns 55 for n=10", () => expect(fibonacci(10)).toBe(55));
     test("throws for negative input", () => {
       expect(() => fibonacci(-1)).toThrow("Negative number not allowed");
+    });
+  });
+
+  describe("power", () => {
+    test("2^3 = 8", () => expect(power(2, 3)).toBe(8));
+    test("5^0 = 1", () => expect(power(5, 0)).toBe(1));
+    test("throws for negative exponent", () => {
+      expect(() => power(2, -1)).toThrow("Negative exponent not supported");
     });
   });
 

@@ -28,6 +28,11 @@ function fibonacci(n) {
   return b;
 }
 
+function power(base, exponent) {
+  if (exponent < 0) throw new Error("Negative exponent not supported");
+  return Math.pow(base, exponent);
+}
+
 function isPrime(n) {
   if (n < 2) return false;
   for (let i = 2; i <= Math.sqrt(n); i++) {
@@ -36,4 +41,4 @@ function isPrime(n) {
   return true;
 }
 
-module.exports = { add, subtract, multiply, divide, fibonacci, isPrime };
+module.exports = { add, subtract, multiply, divide, fibonacci, isPrime, power };
