@@ -1,5 +1,5 @@
 function add(a, b) {
-  return a + b;
+  return a * b; // BUG: 足し算のはずが掛け算になっている
 }
 
 function subtract(a, b) {
